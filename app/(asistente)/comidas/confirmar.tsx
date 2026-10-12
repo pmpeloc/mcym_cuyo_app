@@ -1,9 +1,10 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
+import { MAX_PERSONAS } from '@/lib/convencion';
 import { toast } from '../../cliente';
 import { confirmar, misConfirmaciones } from '../acciones';
 
-type Dia = { id: string; titulo: string; abierto: boolean; comidas: { id: string; nombre: string; hora: string }[] };
+type Dia = { id: string; titulo: string; comidas: { id: string; nombre: string; hora: string }[] };
 
 // Sin login: cada celular se identifica con un id al azar guardado en el navegador.
 function leer(k: string) { try { return localStorage.getItem(k) } catch { return null } }
@@ -16,6 +17,7 @@ function dispositivo() {
 
 export function Confirmar({ dias }: { dias: Dia[] }) {
   const [nombre, setNombre] = useState('');
+  const [personas, setPersonas] = useState(1);
   const [falta, setFalta] = useState(false);
   const [resp, setResp] = useState<Record<string, boolean>>({});
   const [enviando, setEnviando] = useState('');
@@ -23,6 +25,7 @@ export function Confirmar({ dias }: { dias: Dia[] }) {
 
   useEffect(() => {
     setNombre(leer('cc-nombre') || '');
+    setPersonas(Number(leer('cc-personas')) || 1);
     misConfirmaciones(dispositivo()).then((r) => setResp(Object.fromEntries(r.map((x) => [x.comida, x.va]))), () => {});
   }, []);
 
@@ -30,8 +33,8 @@ export function Confirmar({ dias }: { dias: Dia[] }) {
     if (!nombre.trim()) { setFalta(true); input.current?.focus(); return }
     setEnviando(comida);
     try {
-      const r = await confirmar(dispositivo(), nombre, comida, va);
-      if ('error' in r) toast(r.error === 'Ese día ya cerró' ? 'Ese día ya cerró. Avisá en recepción.' : 'No se pudo guardar. Probá de nuevo.');
+      const r = await confirmar(dispositivo(), nombre, personas, comida, va);
+      if ('error' in r) toast('No se pudo guardar. Probá de nuevo.');
       else { setResp((p) => ({ ...p, [comida]: va })); toast(va ? 'Confirmado. ¡Te esperamos!' : 'Listo, avisamos a cocina que no venís') }
     } catch { toast('Sin conexión. Probá de nuevo en un rato.') }
     setEnviando('');
@@ -46,17 +49,25 @@ export function Confirmar({ dias }: { dias: Dia[] }) {
           onChange={(e) => { setNombre(e.target.value); setFalta(false); guardar('cc-nombre', e.target.value) }} />
         {falta && <span className="err" role="alert">Escribí tu nombre e iglesia antes de confirmar.</span>}
       </div>
+      <div className="field campo-nombre">
+        <label htmlFor="personas">¿Cuántas personas son?</label>
+        <select className="input" id="personas" value={personas}
+          onChange={(e) => { setPersonas(Number(e.target.value)); guardar('cc-personas', e.target.value) }}>
+          {Array.from({ length: MAX_PERSONAS }, (_, i) => i + 1).map((n) => <option key={n} value={n}>{n === 1 ? 'Solo yo' : `${n} personas`}</option>)}
+        </select>
+        <span className="note">Si vienen en familia, confirmá una vez por todos, contando a los chicos. Si cambia la cantidad, volvé a tocar Voy.</span>
+      </div>
       <div className="dias-comida">
         {dias.map((d) => (
           <div className="card" key={d.id}>
-            <div className="entre"><span className="lbl">{d.titulo}</span>{!d.abierto && <span className="cerrado">Cerrado</span>}</div>
+            <div className="entre"><span className="lbl">{d.titulo}</span></div>
             {d.comidas.map((c) => (
               <div className="meal-row" key={c.id}>
                 <div>{c.nombre}<small>{c.hora} h</small></div>
                 <span className="sino" role="group" aria-label={`${c.nombre} del ${d.titulo}`}>
                   {([true, false] as const).map((va) => (
                     <button key={String(va)} type="button" className={`${va ? 'si' : 'no'}${resp[c.id] === va ? ' on' : ''}`} aria-pressed={resp[c.id] === va}
-                      disabled={!d.abierto || enviando === c.id} onClick={() => elegir(c.id, va)}>
+                      disabled={enviando === c.id} onClick={() => elegir(c.id, va)}>
                       {va ? 'Voy' : 'No voy'}
                     </button>
                   ))}
@@ -66,7 +77,7 @@ export function Confirmar({ dias }: { dias: Dia[] }) {
           </div>
         ))}
       </div>
-      <p className="note">Si cambiás de idea, podés modificar tu respuesta mientras el día siga abierto.</p>
+      <p className="note">Si cambiás de idea, podés modificar tu respuesta cuando quieras.</p>
     </div>
   );
 }

@@ -39,18 +39,10 @@ export default async function MenuDeHoy() {
           <section className="comida" key={c.id}>
             <h3>{c.nombre} <span>{c.hora} h</span></h3>
             <ul className="items">
-              {items.filter((i) => i.comida === c.id && (i.quitado || i.valor.trim())).map((i) => {
-                if (i.quitado)
-                  return <li key={i.id} className="off"><span className="k">{i.tipo}<span className="chip gris">Hoy no hay</span></span><span className="v">{i.original ?? i.valor}</span></li>;
-                const nuevo = i.original === null, cambio = !nuevo && i.valor !== i.original;
-                return (
-                  <li key={i.id}>
-                    <span className="k">{i.tipo}{nuevo ? <span className="chip nuevo">Nuevo</span> : cambio && <span className="chip cambio">Cambió</span>}</span>
-                    <span className="v">{i.valor}</span>
-                    {cambio && <span className="was">Antes: <s>{i.original}</s></span>}
-                  </li>
-                );
-              })}
+              {/* Pedido de la organización: el asistente ve el menú vigente, sin marcar qué cambió. */}
+              {items.filter((i) => i.comida === c.id && !i.quitado && i.valor.trim()).map((i) => (
+                <li key={i.id}><span className="k">{i.tipo}</span><span className="v">{i.valor}</span></li>
+              ))}
             </ul>
           </section>
         ))}

@@ -13,6 +13,7 @@ export const COMIDAS = DIAS.flatMap((d) => [
 ]);
 
 export const MAX_MENSAJE = 400;
+export const MAX_PERSONAS = 15; // una familia confirma por todos desde un celular
 const TZ = 'America/Argentina/Mendoza';
 
 // AHORA_SIMULADO (ej. 2026-11-13T12:00:00-03:00) permite probar antes del evento.
@@ -24,25 +25,8 @@ export function hoy(): DiaId | 'antes' | 'despues' {
   return DIAS.find((d) => d.fecha === f)?.id ?? 'despues';
 }
 
-// Cada día se confirma hasta las 20:00 del día anterior (Argentina no tiene horario de verano: UTC-3 fijo).
-export function cierre(dia: DiaId) {
-  const c = new Date(`${DIAS.find((d) => d.id === dia)!.fecha}T20:00:00-03:00`);
-  c.setUTCDate(c.getUTCDate() - 1);
-  return c;
-}
-export const abierta = (dia: DiaId) => ahora() < cierre(dia);
-
 export const hora = (d: string | Date) =>
   new Intl.DateTimeFormat('es-AR', { timeZone: TZ, hour: '2-digit', minute: '2-digit', hour12: false }).format(new Date(d));
 
 export const iniciales = (n: string) =>
   n.split(/\s+y\s+/).map((x) => x.trim()[0] || '').join('').toUpperCase().slice(0, 2) || '?';
-
-// "Hoy: viernes 13 · 20:00 cierra el sábado" (panel de confirmaciones).
-export function textoCierre() {
-  const h = hoy(), i = DIAS.findIndex((d) => d.id === h);
-  if (h === 'antes') return 'Cada día cierra a las 20:00 del día anterior';
-  if (i < 0) return 'La convención terminó';
-  const d = DIAS[i], sig = DIAS[i + 1];
-  return `Hoy: ${d.nombre.toLowerCase()} ${d.texto.split(' ')[0]}${sig ? ` · 20:00 cierra el ${sig.nombre.toLowerCase()}` : ''}`;
-}

@@ -81,13 +81,8 @@ button:disabled { cursor: not-allowed }
 .peligro { color: var(--no) !important }
 .wrapgap { display: flex; flex-wrap: wrap; gap: 12px; align-items: center }
 .entre { display: flex; justify-content: space-between; align-items: center; gap: 8px }
-.chip { display: inline-block; margin-left: 6px; padding: 1px 8px; border-radius: 999px; font-size: 11px; font-weight: 700; letter-spacing: .04em; vertical-align: 1px }
-.chip.cambio { background: var(--warn-bg); color: var(--warn) }
-.chip.nuevo { background: var(--ok-bg); color: var(--ok) }
-.chip.gris { background: var(--surface-2); color: var(--ink-muted) }
 .estado { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 12px; font-weight: 700; white-space: nowrap }
 .estado.abierta { background: var(--ok-bg); color: var(--ok) }
-.estado.cerrada { background: var(--surface-2); color: var(--ink-muted) }
 .estado.falta { background: var(--warn-bg); color: var(--warn) }
 .toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--ink); color: var(--bg);
   padding: 10px 16px; border-radius: 10px; font-weight: 500; font-size: 15px; max-width: calc(100% - 32px); z-index: 10; box-shadow: 0 6px 24px rgba(8, 61, 107, .25) }
@@ -110,8 +105,6 @@ button:disabled { cursor: not-allowed }
 .items li:last-child { border-bottom: 0 }
 .k { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-muted); font-weight: 600 }
 .v { font-size: 18px; font-weight: 500 }
-.was { font-size: 14px; color: var(--ink-muted) }
-.off .v { text-decoration: line-through; color: var(--ink-muted) }
 @media (min-width: 1024px) {
   .menu-dia { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; align-items: start }
   .menu-dia .comida { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px }
@@ -128,7 +121,6 @@ button:disabled { cursor: not-allowed }
 .sino .si.on { background: var(--ok-bg); color: var(--ok) }
 .sino .no.on { background: var(--no-bg); color: var(--no) }
 .sino button:disabled { opacity: .5 }
-.cerrado { font-size: 13px; font-weight: 600; color: var(--ink-muted) }
 @media (min-width: 1024px) {
   .dias-comida { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px }
   .campo-nombre { max-width: 460px }

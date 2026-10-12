@@ -47,6 +47,7 @@ create table confirmaciones (
   comida text not null,
   va boolean not null,
   nombre text not null,
+  personas int not null default 1 check (personas between 1 and 15), -- una familia confirma por todos
   actualizado timestamptz not null default now(),
   primary key (dispositivo, comida)
 );

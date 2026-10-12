@@ -6,7 +6,7 @@ Next.js en Vercel + Supabase (Postgres + Storage). No tiene login.
 | Ruta | Para quién | Qué hace |
 |---|---|---|
 | `/` | Asistentes | Menú del día en curso, con cambios, aviso del día y refresco cada minuto |
-| `/comidas` | Asistentes | Voy / No voy a los 4 almuerzos y las 4 cenas. Cierra a las 20:00 del día anterior |
+| `/comidas` | Asistentes | Voy / No voy a los 4 almuerzos y las 4 cenas, para una persona o una familia. Sin cierre |
 | `/bienvenida` | Asistentes | Mensajes de los matrimonios pastorales |
 | `/info` | Asistentes | Wi‑Fi y objetos perdidos |
 | `/apuntes` | Asistentes | Apuntes privados: solo en el celular, nunca van al servidor |
@@ -16,8 +16,8 @@ Next.js en Vercel + Supabase (Postgres + Storage). No tiene login.
 
 ### Asistentes (entran por el QR)
 
-- **Menú de hoy**: muestra solo el menú del día en curso. Antes del jueves 12 dice "Todavía no empezó" y después del domingo 15, "¡Gracias por venir!". Si cocina cambia algo, aparece marcado ("Cambió", "Nuevo", "Hoy no hay") y la página se actualiza sola cada minuto.
-- **Confirmar comidas**: escribir una vez el nombre y la iglesia, y marcar **Voy** o **No voy** en cada almuerzo y cena. Se puede cambiar la respuesta hasta las **20:00 del día anterior**; después ese día queda "Cerrado". La respuesta queda asociada al celular: si confirman desde otro celular, cuentan como otra persona.
+- **Menú de hoy**: muestra solo el menú del día en curso. Antes del jueves 12 dice "Todavía no empezó" y después del domingo 15, "¡Gracias por venir!". Si cocina cambia algo, el asistente ve directamente el menú nuevo, sin marcas de qué cambió, y la página se actualiza sola cada minuto.
+- **Confirmar comidas**: escribir una vez el nombre y la iglesia, elegir cuántas personas son (una familia confirma una sola vez por todos) y marcar **Voy** o **No voy** en cada almuerzo y cena. No hay cierre: se puede cambiar en cualquier momento. La respuesta queda asociada al celular: si confirman desde otro celular, cuentan como otra persona.
 - **Bienvenida**: los mensajes de los pastores de Mendoza.
 - **Wi‑Fi y avisos**: red y clave (botón "Copiar") y objetos perdidos, que se retiran en recepción.
 - **Mis apuntes**: un apunte por día. Se guardan **solo en ese celular**: nadie más los ve. Si se borran los datos del navegador o cambian de celular, se pierden, así que conviene usar **"Compartir mis apuntes"** para mandárselos por WhatsApp o mail.
@@ -30,14 +30,14 @@ En Menú y Wi‑Fi, cada campo **se guarda al salir de él** (al tocar otro camp
 
 - **Menú**
   - Elegir el día arriba; el de hoy dice "· hoy".
-  - Para cambiar un plato, escribir encima. Queda marcado en ámbar y el asistente ve "Antes: …" tachado. **Volver al original** lo deshace.
+  - Para cambiar un plato, escribir encima. Queda marcado en ámbar en el panel; el asistente solo ve el plato nuevo. **Volver al original** lo deshace.
   - **Restaurar menú original del día** deshace todos los cambios del día (pide un segundo toque).
-  - **Quitar hoy** marca un plato como "Hoy no hay" sin borrarlo.
-  - **+ Agregar algo** crea un ítem "Nuevo": escribir el tipo (ej. "Extra") y qué es. Mientras esté vacío no lo ve nadie. **Borrar** lo elimina.
+  - **Quitar hoy** saca un plato del menú del asistente sin borrarlo (en el panel se ve tachado).
+  - **+ Agregar algo** crea un ítem: escribir el tipo (ej. "Extra") y qué es. Mientras esté vacío no lo ve nadie. **Borrar** lo elimina.
   - **Aviso del día**: texto opcional que aparece arriba del menú (ej. cambio de salón).
 - **Confirmaciones**
-  - Muestra cuántos van y cuántos no van a cada comida. "Ver nombres" despliega la lista.
-  - Cuando dice **Cerrada**, el número ya no cambia: es el que se usa para cocinar.
+  - Muestra cuántas personas van y cuántas no van a cada comida (una familia que confirma por 5 suma 5). "Ver nombres" despliega la lista.
+  - No hay cierre: el número puede cambiar hasta último momento. La organización avisa para que confirmen a tiempo.
   - Si un nombre aparece dos veces, es la misma persona confirmando desde dos celulares.
 - **Wi‑Fi y objetos perdidos**
   - Red y clave se editan directamente.
@@ -74,6 +74,6 @@ En Menú y Wi‑Fi, cada campo **se guarda al salir de él** (al tocar otro camp
 - **La base solo se usa desde el servidor**, con la clave secreta. RLS está activado sin políticas, así que la
   clave pública no sirve para leer ni escribir.
 - Días, comidas y horarios están en `lib/convencion.ts`.
-- Chequeo de la lógica de cierre: `node scripts/check-cierre.ts`.
+- Chequeo del "día de hoy": `node scripts/check-hoy.ts`.
 - La fuente Tan Meringue (`app/TanMeringue.woff2`) es paga y la proveyó la organización. No conviene que este
   repo sea público.
