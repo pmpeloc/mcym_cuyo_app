@@ -1,5 +1,5 @@
-import { Toast } from '../componentes';
+import { Toast } from '../cliente';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
-  return <div className="app">{children}<Toast /></div>;
+  return <>{children}<Toast /></>;
 }

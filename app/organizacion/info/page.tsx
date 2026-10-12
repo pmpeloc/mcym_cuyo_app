@@ -1,4 +1,5 @@
 import { db, ok, type Perdido } from '@/lib/db';
+import { Organizacion } from '../organizacion';
 import { EditorInfo } from './editor-info';
 
 export default async function Info() {
@@ -8,9 +9,10 @@ export default async function Info() {
     s.from('perdidos').select('*').order('creado', { ascending: false }).then(ok<Perdido[]>),
   ]);
   return (
-    <>
-      <h2>Wi‑Fi y objetos perdidos</h2>
-      <EditorInfo red={wifi?.wifi_red ?? ''} clave={wifi?.wifi_clave ?? ''} perdidos={perdidos} />
-    </>
+    <Organizacion titulo="Wi‑Fi y objetos perdidos" tituloMovil="Wi‑Fi y objetos">
+      <div className="stack">
+        <EditorInfo red={wifi?.wifi_red ?? ''} clave={wifi?.wifi_clave ?? ''} perdidos={perdidos} />
+      </div>
+    </Organizacion>
   );
 }

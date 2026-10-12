@@ -7,7 +7,6 @@ import { db, ok } from '@/lib/db';
 const EDITABLE: Record<string, string[]> = {
   menu_items: ['tipo', 'valor'],
   perdidos: ['que', 'donde', 'cuando'],
-  pastores: ['nombres', 'iglesia', 'mensaje'],
 };
 const listo = () => revalidatePath('/', 'layout');
 
@@ -56,6 +55,18 @@ export async function volverItem(id: string) {
   listo();
 }
 
+// "Restaurar menú original del día": borra lo agregado y deshace cambios y "Hoy no hay".
+export async function restaurarDia(dia: string) {
+  const comidas = COMIDAS.filter((c) => c.dia === dia).map((c) => c.id);
+  if (!comidas.length) throw new Error('Día inválido');
+  const s = db();
+  ok(await s.from('menu_items').delete().in('comida', comidas).is('original', null));
+  const items = ok(await s.from('menu_items').select('id, original').in('comida', comidas)) as { id: string; original: string }[];
+  await Promise.all(items.map((i) => s.from('menu_items').update({ valor: i.original, quitado: false }).eq('id', i.id).then(ok)));
+  ok(await s.from('dias').upsert({ id: dia, actualizado: new Date().toISOString() }));
+  listo();
+}
+
 // ---------- Wi‑Fi y objetos perdidos ----------
 export async function guardarWifi(campo: 'wifi_red' | 'wifi_clave', valor: string) {
   if (campo !== 'wifi_red' && campo !== 'wifi_clave') throw new Error('Campo inválido');
@@ -74,9 +85,20 @@ export async function entregarPerdido(id: string) {
 }
 
 // ---------- Bienvenidas ----------
-export async function agregarPastor() {
-  ok(await db().from('pastores').insert({ orden: Date.now() / 1000 | 0 }));
+// Formulario "Guardar y publicar": crea o actualiza y devuelve el id (para subir la foto después).
+export async function guardarPastor(id: string | null, c: { nombres: string; iglesia: string; mensaje: string }) {
+  const datos = {
+    nombres: String(c.nombres).trim().slice(0, 120),
+    iglesia: String(c.iglesia).trim().slice(0, 120),
+    mensaje: String(c.mensaje).trim().slice(0, MAX_MENSAJE),
+  };
+  if (!datos.nombres || !datos.iglesia) throw new Error('Faltan nombres o iglesia');
+  const s = db();
+  const r = id
+    ? ok(await s.from('pastores').update(datos).eq('id', id).select('id').single())
+    : ok(await s.from('pastores').insert({ ...datos, orden: (Date.now() / 1000) | 0 }).select('id').single());
   listo();
+  return (r as unknown as { id: string }).id;
 }
 
 export async function eliminarPastor(id: string) {

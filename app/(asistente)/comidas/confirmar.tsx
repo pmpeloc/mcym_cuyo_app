@@ -1,6 +1,6 @@
 'use client';
-import { useEffect, useState } from 'react';
-import { toast } from '../../componentes';
+import { useEffect, useRef, useState } from 'react';
+import { toast } from '../../cliente';
 import { confirmar, misConfirmaciones } from '../acciones';
 
 type Dia = { id: string; titulo: string; abierto: boolean; comidas: { id: string; nombre: string; hora: string }[] };
@@ -16,8 +16,10 @@ function dispositivo() {
 
 export function Confirmar({ dias }: { dias: Dia[] }) {
   const [nombre, setNombre] = useState('');
+  const [falta, setFalta] = useState(false);
   const [resp, setResp] = useState<Record<string, boolean>>({});
   const [enviando, setEnviando] = useState('');
+  const input = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     setNombre(leer('cc-nombre') || '');
@@ -25,7 +27,7 @@ export function Confirmar({ dias }: { dias: Dia[] }) {
   }, []);
 
   async function elegir(comida: string, va: boolean) {
-    if (!nombre.trim()) { toast('Escribí tu nombre e iglesia antes de confirmar'); document.getElementById('nombre')?.focus(); return }
+    if (!nombre.trim()) { setFalta(true); input.current?.focus(); return }
     setEnviando(comida);
     try {
       const r = await confirmar(dispositivo(), nombre, comida, va);
@@ -37,32 +39,33 @@ export function Confirmar({ dias }: { dias: Dia[] }) {
 
   return (
     <div className="stack">
-      <div className="field">
+      <div className="field campo-nombre">
         <label htmlFor="nombre">Tu nombre e iglesia</label>
-        <input id="nombre" autoComplete="name" maxLength={80} placeholder="Ej.: Juan Pérez · Iglesia de Maipú" value={nombre}
-          onChange={(e) => { setNombre(e.target.value); guardar('cc-nombre', e.target.value) }} />
-        <small className="note">Solo lo ve el equipo de cocina, para saber cuántos platos preparar.</small>
+        <input ref={input} className={`input${falta ? ' error' : ''}`} id="nombre" autoComplete="name" maxLength={80}
+          placeholder="Ej.: Juan Pérez · Iglesia de Maipú" value={nombre} aria-invalid={falta}
+          onChange={(e) => { setNombre(e.target.value); setFalta(false); guardar('cc-nombre', e.target.value) }} />
+        {falta && <span className="err" role="alert">Escribí tu nombre e iglesia antes de confirmar.</span>}
       </div>
-      {dias.map((d) => (
-        <div className="card" key={d.id}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'baseline' }}>
-            <span className="lbl">{d.titulo}</span>{!d.abierto && <span className="cerrado">Cerrado</span>}
+      <div className="dias-comida">
+        {dias.map((d) => (
+          <div className="card" key={d.id}>
+            <div className="entre"><span className="lbl">{d.titulo}</span>{!d.abierto && <span className="cerrado">Cerrado</span>}</div>
+            {d.comidas.map((c) => (
+              <div className="meal-row" key={c.id}>
+                <div>{c.nombre}<small>{c.hora} h</small></div>
+                <span className="sino" role="group" aria-label={`${c.nombre} del ${d.titulo}`}>
+                  {([true, false] as const).map((va) => (
+                    <button key={String(va)} type="button" className={`${va ? 'si' : 'no'}${resp[c.id] === va ? ' on' : ''}`} aria-pressed={resp[c.id] === va}
+                      disabled={!d.abierto || enviando === c.id} onClick={() => elegir(c.id, va)}>
+                      {va ? 'Voy' : 'No voy'}
+                    </button>
+                  ))}
+                </span>
+              </div>
+            ))}
           </div>
-          {d.comidas.map((c) => (
-            <div className="meal-row" key={c.id}>
-              <div>{c.nombre}<small>{c.hora} h</small></div>
-              <span className="sino" role="group" aria-label={`${c.nombre} del ${d.titulo}`}>
-                {([true, false] as const).map((va) => (
-                  <button key={String(va)} className={va ? 'si' : 'no'} aria-pressed={resp[c.id] === va}
-                    disabled={!d.abierto || enviando === c.id} onClick={() => elegir(c.id, va)}>
-                    {va ? 'Voy' : 'No voy'}
-                  </button>
-                ))}
-              </span>
-            </div>
-          ))}
-        </div>
-      ))}
+        ))}
+      </div>
       <p className="note">Si cambiás de idea, podés modificar tu respuesta mientras el día siga abierto.</p>
     </div>
   );

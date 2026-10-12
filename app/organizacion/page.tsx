@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { COMIDAS, DIAS, hoy, hora } from '@/lib/convencion';
 import { db, ok, type MenuItem } from '@/lib/db';
 import { EditorMenu } from './editor-menu';
+import { Organizacion } from './organizacion';
 
 export default async function Menu({ searchParams }: { searchParams: Promise<{ dia?: string }> }) {
   const h = hoy();
@@ -13,23 +14,22 @@ export default async function Menu({ searchParams }: { searchParams: Promise<{ d
     s.from('menu_items').select('*').in('comida', comidas.map((c) => c.id)).order('orden').then(ok<MenuItem[]>),
     s.from('dias').select('aviso, actualizado').eq('id', dia.id).maybeSingle().then(ok<{ aviso: string; actualizado: string | null } | null>),
   ]);
+  const dias = (corto: boolean, clase: string) => (
+    <div className={`days ${clase}`}>
+      {DIAS.map((d) => (
+        <Link key={d.id} href={`/organizacion?dia=${d.id}`} replace className={d.id === dia.id ? 'on' : ''}>
+          {corto ? d.nombre.slice(0, 3) : d.nombre}{d.id === h ? ' · hoy' : ''}
+        </Link>
+      ))}
+    </div>
+  );
+  const pie = `${info?.actualizado ? `Guardado ${hora(info.actualizado)} h. ` : ''}${dia.id === h ? 'Los asistentes ya lo ven.' : `Se verá el ${dia.nombre.toLowerCase()}.`}`;
   return (
-    <>
-      <div className="acts">
-        <h2>Editar menú</h2>
-        <div className="chips">
-          {DIAS.map((d) => (
-            <Link key={d.id} href={`/organizacion?dia=${d.id}`} aria-current={d.id === dia.id ? 'page' : undefined}>
-              {d.nombre}{d.id === h ? ' · hoy' : ''}
-            </Link>
-          ))}
-        </div>
+    <Organizacion titulo="Editar menú" derecha={dias(false, '')}>
+      <div className="stack">
+        {dias(true, 'movil')}
+        <EditorMenu dia={dia.id} aviso={info?.aviso ?? ''} comidas={comidas} items={items} pie={pie} />
       </div>
-      <EditorMenu dia={dia.id} aviso={info?.aviso ?? ''} comidas={comidas} items={items} />
-      <p className="note">
-        {info?.actualizado ? `Última modificación: ${hora(info.actualizado)} h. ` : ''}
-        Se guarda al salir de cada campo. {dia.id === h ? 'Los asistentes ya lo ven.' : `Se verá el ${dia.nombre.toLowerCase()}.`}
-      </p>
-    </>
+    </Organizacion>
   );
 }

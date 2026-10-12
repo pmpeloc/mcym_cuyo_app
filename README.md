@@ -26,11 +26,12 @@ Next.js en Vercel + Supabase (Postgres + Storage). No tiene login.
 
 El link del panel se pasa solo a quienes lo usan. No tiene clave: no hay que compartirlo en grupos grandes ni en el QR.
 
-Cada campo **se guarda al salir de él** (al tocar otro campo o fuera del cuadro). Abajo aparece un aviso de "Guardado".
+En Menú y Wi‑Fi, cada campo **se guarda al salir de él** (al tocar otro campo o fuera del cuadro). Abajo aparece un aviso de "Guardado".
 
 - **Menú**
   - Elegir el día arriba; el de hoy dice "· hoy".
   - Para cambiar un plato, escribir encima. Queda marcado en ámbar y el asistente ve "Antes: …" tachado. **Volver al original** lo deshace.
+  - **Restaurar menú original del día** deshace todos los cambios del día (pide un segundo toque).
   - **Quitar hoy** marca un plato como "Hoy no hay" sin borrarlo.
   - **+ Agregar algo** crea un ítem "Nuevo": escribir el tipo (ej. "Extra") y qué es. Mientras esté vacío no lo ve nadie. **Borrar** lo elimina.
   - **Aviso del día**: texto opcional que aparece arriba del menú (ej. cambio de salón).
@@ -43,9 +44,10 @@ Cada campo **se guarda al salir de él** (al tocar otro campo o fuera del cuadro
   - **+ Cargar objeto encontrado** agrega uno con el día y la hora actuales. Completar qué es y dónde estaba.
   - **Entregado** lo saca de la lista de los asistentes.
 - **Bienvenidas**
-  - Un recuadro por matrimonio: foto (se recorta cuadrada sola), nombres, iglesia y mensaje de hasta 400 caracteres.
-  - ↑ y ↓ cambian el orden. **Eliminar** pide un segundo toque para confirmar.
-  - Sin foto se muestran las iniciales; sin nombres o sin mensaje no se publica.
+  - La lista muestra cada matrimonio con su estado: **Publicado**, **Falta foto** (se publica con las iniciales) o **Falta mensaje** (no se muestra hasta completarlo).
+  - **Editar** o **+ Agregar matrimonio** abre el formulario: foto (en el celular, “Sacar foto” o “Elegir de la galería”; en la computadora se puede arrastrar), nombres, iglesia y mensaje de hasta 400 caracteres. A la derecha se ve la tarjeta tal como la verá el asistente.
+  - **Guardar y publicar** guarda todo junto. Nombres e iglesia son obligatorios. **Eliminar matrimonio** pide un segundo toque.
+  - En la computadora, ↑ y ↓ cambian el orden en que aparecen.
 
 ### Antes del evento
 

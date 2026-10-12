@@ -1,17 +1,21 @@
 'use client';
+// Piezas que necesitan el navegador. Nada de acá se llama desde el servidor: solo se renderiza.
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
-export function Nav({ links }: { links: [string, string][] }) {
+export type Enlace = [href: string, texto: string, corto?: string];
+
+export function Nav({ links, pill }: { links: Enlace[]; pill?: boolean }) {
   const path = usePathname();
-  return (
-    <nav className="pnav">
-      {links.map(([href, t]) => (
-        <Link key={href} href={href} aria-current={path === href ? 'page' : undefined}>{t}</Link>
-      ))}
-    </nav>
-  );
+  return links.map(([href, t, corto]) => {
+    const on = path === href;
+    return (
+      <Link key={href} href={href} className={`${pill ? 'pill' : ''}${on ? ' on' : ''}`} aria-current={on ? 'page' : undefined}>
+        {pill && corto ? corto : t}
+      </Link>
+    );
+  });
 }
 
 // El menú puede cambiar en el día: se vuelve a pedir cada minuto y al volver a la pestaña.
@@ -39,11 +43,9 @@ export function Toast() {
 
 export function Copiar({ texto }: { texto: string }) {
   return (
-    <button className="mini" onClick={() => navigator.clipboard.writeText(texto).then(() => toast('Clave copiada'), () => toast('Mantené apretada la clave para copiarla'))}>
+    <button className="mini" type="button"
+      onClick={() => navigator.clipboard.writeText(texto).then(() => toast('Clave copiada'), () => toast('Mantené apretada la clave para copiarla'))}>
       Copiar
     </button>
   );
 }
-
-export const iniciales = (n: string) =>
-  n.split(/\s+y\s+/).map((x) => x.trim()[0] || '').join('').toUpperCase().slice(0, 2) || '?';
