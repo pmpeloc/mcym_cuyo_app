@@ -59,5 +59,8 @@ alter table perdidos enable row level security;
 alter table pastores enable row level security;
 alter table confirmaciones enable row level security;
 
+-- Los proyectos nuevos de Supabase no dan permisos automáticos: solo el rol del servidor accede.
+grant select, insert, update, delete on all tables in schema public to service_role;
+
 -- Fotos de los pastores: lectura pública por URL, escritura solo desde el servidor.
 insert into storage.buckets (id, name, public) values ('pastores', 'pastores', true);
