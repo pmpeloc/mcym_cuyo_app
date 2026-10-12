@@ -8,22 +8,15 @@ export type Enlace = [href: string, texto: string, corto?: string];
 
 export function Nav({ links, pill }: { links: Enlace[]; pill?: boolean }) {
   const path = usePathname();
-  const activa = useRef<HTMLAnchorElement>(null);
-  // Píldoras (celular): la sección elegida queda primera a la izquierda de la barra.
-  useEffect(() => {
-    const a = activa.current, barra = a?.parentElement;
-    if (!pill || !a || !barra) return;
-    const destino = a.offsetLeft - barra.offsetLeft - 14;
-    // Las últimas no llegan a la izquierda: se agrega solo el espacio que les falta al final.
-    barra.style.paddingRight = '';
-    const falta = destino + barra.clientWidth - barra.scrollWidth;
-    if (falta > 0) barra.style.paddingRight = `${14 + falta}px`;
-    barra.scrollTo({ left: destino, behavior: 'smooth' });
-  }, [pill, path]);
-  return links.map(([href, t, corto]) => {
+  const primera = useRef<HTMLAnchorElement>(null);
+  // Píldoras (celular): la sección elegida pasa al primer lugar y las demás siguen en su orden.
+  const orden = pill ? [...links.filter(([h]) => h === path), ...links.filter(([h]) => h !== path)] : links;
+  // Al reordenar, la barra vuelve al principio para que se vea la elegida.
+  useEffect(() => { if (pill) primera.current?.parentElement?.scrollTo({ left: 0 }) }, [pill, path]);
+  return orden.map(([href, t, corto], i) => {
     const on = path === href;
     return (
-      <Link key={href} href={href} ref={on ? activa : undefined} className={`${pill ? 'pill' : ''}${on ? ' on' : ''}`} aria-current={on ? 'page' : undefined}>
+      <Link key={href} href={href} ref={i === 0 ? primera : undefined} className={`${pill ? 'pill' : ''}${on ? ' on' : ''}`} aria-current={on ? 'page' : undefined}>
         {pill && corto ? corto : t}
       </Link>
     );
